@@ -1,0 +1,54 @@
+name: Nix CI
+
+on:
+  push:
+    branches: [liquido]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Ratpac2 using Nix
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Ratpac2
+        uses: actions/checkout@v4
+        with:
+          path: ratpac2
+
+      - name: Checkout Nix environment
+        uses: actions/checkout@v4
+        with:
+          repository: mdcge/LiquidOSimulations-nix
+          ref: master
+          path: nix-env
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Build current Ratpac2 checkout
+        run: |
+          nix develop ./nix-env --command bash -e -c '
+            cd ratpac2
+            make -j$(nproc)
+          '
+
+  formatting:
+    name: Check C++ formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Ratpac2
+        uses: actions/checkout@v4
+
+      - name: Check formatting
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: '14'
+          check-path: 'src'
+          fallback-style: 'Google'

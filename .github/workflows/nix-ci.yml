@@ -2,7 +2,7 @@ name: Nix CI
 
 on:
   push:
-    branches: [liquido]
+    branches: [con-int-setup]
   pull_request:
     branches: [main]
   workflow_dispatch:
